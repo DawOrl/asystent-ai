@@ -1,26 +1,225 @@
 @import "tailwindcss";
 
+/*
+  Asystent AI — design system „Midnight Console".
+  Kierunek: ciemny, techniczny, premium. Czat/AI jest bohaterem strony.
+*/
+
+@theme {
+  /* Powierzchnie */
+  --color-canvas: #0a0a0b; /* główne tło (NIE „base" — kolidowałoby z text-base) */
+  --color-ink-2: #0e0f13; /* sekcje naprzemienne */
+  --color-surface: #121319; /* karty nieszklane */
+  --color-surface-glass: rgba(255, 255, 255, 0.04); /* szkło */
+  --color-stroke: rgba(255, 255, 255, 0.08); /* 1px obrys */
+  --color-stroke-strong: rgba(255, 255, 255, 0.16);
+
+  /* Aurora (zimne) */
+  --color-aurora-1: #6366f1; /* indygo */
+  --color-aurora-2: #8b5cf6; /* fiolet */
+  --color-aurora-3: #22d3ee; /* cyan */
+
+  /* Akcent — emerald/mint (chłodny pop na ciemnym tle) */
+  --color-accent: #34d399;
+  --color-accent-strong: #10b981;
+  --color-on-accent: #04130d; /* tekst na jasnym akcencie (przyciski) */
+
+  /* Tekst */
+  --color-fg: #ededef;
+  --color-muted: #8a8f98;
+
+  /* Fonty (wpięte w layout.tsx przez next/font) */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+  --font-display: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout */
+  --container-content: 80rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: var(--color-canvas);
+  --foreground: var(--color-fg);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  * {
+    border-color: var(--color-stroke);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem; /* offset pod sticky-nav przy kotwicach */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "kern", "liga", "calt";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-fg);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Poszanowanie preferencji ruchu — także dla View Transitions */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation-duration: 0.001ms !important;
+      animation-delay: 0s !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Mono „eyebrow" — etykieta nad nagłówkiem */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: var(--color-accent);
+  }
+
+  /* Szklany panel */
+  .glass {
+    background-color: var(--color-surface-glass);
+    border: 1px solid var(--color-stroke);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  }
+
+  /* Spotlight pod kursorem (SpotlightCard) */
+  .spotlight {
+    background: radial-gradient(
+      300px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--color-accent) 24%, transparent),
+      color-mix(in srgb, var(--color-accent) 7%, transparent) 38%,
+      transparent 66%
+    );
+  }
+
+  /* Przyciski — bez obramówek, z hoverem (poświata + uniesienie) */
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+    transition:
+      background-color 0.2s var(--ease-out-soft),
+      box-shadow 0.3s var(--ease-out-soft),
+      transform 0.2s var(--ease-out-soft);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-accent-strong);
+    box-shadow: 0 12px 34px -12px
+      color-mix(in srgb, var(--color-accent) 75%, transparent);
+    transform: translateY(-2px);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-ghost {
+    background-color: color-mix(in srgb, white 5%, transparent);
+    color: var(--color-fg);
+    transition:
+      background-color 0.2s var(--ease-out-soft),
+      color 0.2s var(--ease-out-soft),
+      box-shadow 0.3s var(--ease-out-soft),
+      transform 0.2s var(--ease-out-soft);
+  }
+  .btn-ghost:hover {
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent);
+    box-shadow: 0 10px 30px -14px
+      color-mix(in srgb, var(--color-accent) 60%, transparent);
+    transform: translateY(-2px);
+  }
+  .btn-ghost:active {
+    transform: translateY(0);
+  }
+}
+
+/* Subtelny dotted-grid dla sekcji (jak bella bg-paper, ciemny wariant) */
+@utility bg-grid {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 0
+  );
+  background-size: 24px 24px;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Dryf aurory (tła hero) — przesuwa pozycję gradientów */
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+}
+
+/* Migający kursor typewritera */
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
